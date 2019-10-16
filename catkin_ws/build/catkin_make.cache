@@ -1,0 +1,2 @@
+ivr_lab
+-DCATKIN_DEVEL_PREFIX=/home/cyanide/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/cyanide/catkin_ws/install -G Unix Makefiles

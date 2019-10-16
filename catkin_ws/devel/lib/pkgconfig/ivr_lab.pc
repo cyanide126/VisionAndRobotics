@@ -1,0 +1,8 @@
+prefix=/home/cyanide/catkin_ws/devel
+
+Name: ivr_lab
+Description: Description of ivr_lab
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/cyanide/catkin_ws/devel/lib 
+Requires: 
