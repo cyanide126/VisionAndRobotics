@@ -115,7 +115,7 @@ class image_converter:
         ret,red1 = cv2.threshold(cv_image[:,:,0],10,255,cv2.THRESH_BINARY_INV)
     	ret,red2 = cv2.threshold(cv_image[:,:,1],10,255,cv2.THRESH_BINARY_INV)
     	ret,red3 = cv2.threshold(cv_image[:,:,2],10,255,cv2.THRESH_BINARY_INV)
-    	cv2.imshow('image_window4',red3*red2*red1)
+    	#cv2.imshow('image_window4',red3*red2*red1)
         return red3*red2*red1
 
     def linkCenter():
@@ -127,24 +127,57 @@ class image_converter:
 
         linksCent=[link1Cent,link2Cent,link3Cent]
         return linksCent
-        print(self.link1.shape)
+        #print(self.link1.shape)
 
     def cropLink():
         thresh = thresLink()
         linksCent=linkCenter()
-        print(linksCent)
+        #print(linksCent)
         link1Window=self.link1.shape
         link2Window=self.link2.shape
         link3Window=self.link3.shape
         #print(linksCent[0][1]-(link1Window[0]/2))
         link1Crop = thresh[linksCent[0][1]-(link1Window[0]/2):linksCent[0][1]+(link1Window[0]/2), linksCent[0][0]-(link1Window[1]/2):linksCent[0][0]+(link1Window[1]/2)]
 
-        link2Crop = thresh[linksCent[1][1]-(link2Window[0]/2):linksCent[1][1]+(link1Window[0]/2), linksCent[1][0]-(link1Window[1]/2):linksCent[1][0]+(link1Window[1]/2)]
+        link2Crop = thresh[linksCent[1][1]-(link2Window[0]/2):linksCent[1][1]+(link2Window[0]/2), linksCent[1][0]-(link2Window[1]/2):linksCent[1][0]+(link1Window[1]/2)]
 
-        link1Crop = thresh[linksCent[0][1]-(link1Window[0]/2):linksCent[0][1]+(link1Window[0]/2), linksCent[0][0]-(link1Window[1]/2):linksCent[0][0]+(link1Window[1]/2)]
-        cv2.imshow("cropped",link1Crop)
-    cropLink()
+        link3Crop = thresh[linksCent[2][1]-(link3Window[0]/2):linksCent[2][1]+(link3Window[0]/2), linksCent[2][0]-(link3Window[1]/2):linksCent[2][0]+(link3Window[1]/2)]
+        croppedLinks = [link1Crop, link2Crop, link3Crop]
+        cv2.imshow("cropped1",link1Crop)
+        cv2.imshow("cropped2",link2Crop)
+        cv2.imshow("cropped3",link3Crop)
+        return croppedLinks
+
+    def rotateTemp(angle,img):
+        rows,cols = img.shape
+        M= cv2.getRotationMatrix2D((cols/2,rows/2),angle,1)
+        dst=cv2.warpAffine(img,M,(cols,rows))
+        return dst
+    def distanceTransform(linkNum):
+        cropLinks = cropLink()
+        link_inv = cv2.bitwise_not(cropLinks[linkNum])
+        return cv2.distanceTransform(link_inv,cv2.DIST_L1,5)
+    def minimizeError():
+        minDst=100000**100000
+        minAngle=0
+        for i in range(36):
+            dst=rotateTemp(i*10,self.link1)*distanceTransform(0)
+            totalDst=0
+            rows,cols = dst.shape
+            for p in range (rows):
+                for q in range(cols):
+                    totalDst+=dst[p][q]
+            if totalDst<minDst:
+                minDst=totalDst
+                minAngle=i*10
+        return minAngle
         
+
+    #cropLink()
+    #cv2.imshow("rotate",rotateTemp(45,self.link1))
+    print(minimizeError())
+    
+    
        
     #thresLink()
     #linkCenter()
@@ -156,7 +189,7 @@ class image_converter:
 
     
 
-    cv2.imshow('window', cv_image)
+    #cv2.imshow('window', cv_image)
     cv2.waitKey(3)
 
     # change te value of self.joint.data to your estimated value from thew images once you have finalized the code
